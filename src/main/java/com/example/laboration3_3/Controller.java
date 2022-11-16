@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class ShapeController implements Initializable {
+public class Controller implements Initializable {
     @FXML
     private Slider sliderSize;
     @FXML
@@ -30,13 +30,18 @@ public class ShapeController implements Initializable {
     @FXML
     private Label information;
     public Stage stage; //This needs to be public so HelloApplication can reach it
-    ShapeModel shape;
+    Shape shape;
+    Model model;
+
+    SVG svg;
     GraphicsContext gc;
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        shape = new ShapeModel();
+        shape = new Shape();
+        model = new Model();
+        svg = new SVG();
         gc = canvas.getGraphicsContext2D();
         whiteCanvas();
     }
@@ -63,14 +68,13 @@ public class ShapeController implements Initializable {
     }
 
     public void unDo() {
-        shape.removeLastShapeFromArray();
         whiteCanvas();
-        shape.drawAllShapesInArray(gc);
+        shape.removeLastAndDrawAllShapesInArray(gc);
     }
 
     public void clearCanvasAndArray() {
         whiteCanvas();
-        shape.clearArray();
+        model.clearArray();
     }
 
     public void changeOneShape(int i) {
@@ -89,7 +93,7 @@ public class ShapeController implements Initializable {
 
         information.setText("Choose color and size, then press the shape you want to change.");
 
-        List<ShapeModel> temp = shape.returnArray();
+        List<Shape> temp = shape.returnArray();
 
         canvas.setOnMouseClicked(e ->{
 
@@ -142,5 +146,6 @@ public class ShapeController implements Initializable {
         File file = fileChooser.showSaveDialog(stage);
 
         shape.translateDrawingToSvgString(file);
+
     }
 }

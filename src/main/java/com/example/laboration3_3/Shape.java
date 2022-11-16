@@ -2,15 +2,13 @@ package com.example.laboration3_3;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ShapeModel {
+public class Shape {
 
     private double x;
     private double y;
@@ -19,12 +17,15 @@ public class ShapeModel {
     private double width;
     private int type; //Make enum?
 
-    private static List<ShapeModel> allDrawings = new ArrayList<>();
+    Model model = new Model(); //Can I Initialize here?
 
-    public ShapeModel () {
+    //private static List<ShapeModel> allDrawings = new ArrayList<>();
+
+    public Shape() {
         //Default constructor
+        //Can I use this as a Initialize?
     }
-    public ShapeModel(double x, double y, Color color, double height, double width, int type) {
+    public Shape(double x, double y, Color color, double height, double width, int type) {
         this.x = x;
         this.y = y;
         this.color = color;
@@ -47,18 +48,22 @@ public class ShapeModel {
     //Creates and draws the shapes
     public void createRectangle(GraphicsContext gc, double x, double y, double size, Color color ) {
         drawRectangle(gc, x, y, size, color);
-        ShapeModel temp = new ShapeModel(x, y, color, size, size, 1);
-        addDrawingToArray(temp);
+        Shape temp = new Shape(x, y, color, size, size, 1);
+        model.addDrawingToArray(temp);
     }
 
     public void createCircle(GraphicsContext gc, double x, double y, double size, Color color) {
         drawCircle(gc, x, y, size, color);
-        ShapeModel temp = new ShapeModel(x, y, color, size, size, 2);
-        addDrawingToArray(temp);
+        Shape temp = new Shape(x, y, color, size, size, 2);
+        model.addDrawingToArray(temp);
     }
 
+    public void removeLastAndDrawAllShapesInArray(GraphicsContext gc) {
+        model.removeLastShapeFromArray();
+        drawAllShapesInArray(gc);
+    }
     public void drawAllShapesInArray(GraphicsContext gc) {
-        for (ShapeModel shape : allDrawings) {
+        for (Shape shape : model.returnArray()) {
             if (shape.type == 1) {
                 drawRectangle(gc, shape.x, shape.y, shape.height, shape.color);
             }
@@ -68,24 +73,15 @@ public class ShapeModel {
         }
     }
 
-    //Methods that manipulate the array
-    public void addDrawingToArray (ShapeModel shape) {
-        allDrawings.add(shape);
-    }
-    public void removeLastShapeFromArray() {
-        allDrawings.remove(allDrawings.size() - 1);
-    }
     public void clearArray() {
-        allDrawings.clear();
+        model.clearArray();
     }
-    public List<ShapeModel> returnArray () {
-        return allDrawings;
+    public List<Shape> returnArray () {
+        return model.returnArray();
     }
 
     public void changeOneShape(int i, double size, Color color) {
-        allDrawings.get(i).setWidth(size);
-        allDrawings.get(i).setHeight(size);
-        allDrawings.get(i).setColor(color);
+        model.changeOneShape(i, size, color);
     }
 
     public String toString() {
@@ -94,49 +90,8 @@ public class ShapeModel {
 
     //SVG Method
     public void translateDrawingToSvgString(File file) {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("<svg version=\"1.1\" width=\"300\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\">\n");
-
-        for (int i = 0; i < allDrawings.size(); i++) {
-            if (allDrawings.get(i).type == 1) { //Rectangle
-                sb.append("<rect x=\"").append(allDrawings.get(i).x).append("\" y=\"").append(allDrawings.get(i).y)
-                        .append("\" width=\"").append(allDrawings.get(i).getWidth())
-                        .append("\" height=\"").append(allDrawings.get(i).getHeight())
-                        .append("\" stroke=\"").append(toHexString(allDrawings.get(i).color))
-                        .append("\" fill=\"").append(toHexString(allDrawings.get(i).color))
-                        .append("\" stroke-width=\"1\"")
-                        .append("/>\n");
-            }
-            else if (allDrawings.get(i).type == 2) { //Circle
-                double radie = allDrawings.get(i).height / 2;
-                sb.append("<circle cx=\"").append(allDrawings.get(i).x).append("\" cy=\"").append(allDrawings.get(i).y)
-                        .append("\" r=\"").append(radie)
-                        .append("\" stroke=\"").append(toHexString(allDrawings.get(i).color))
-                        .append("\" fill=\"").append(toHexString(allDrawings.get(i).color))
-                        .append("\" stroke-width=\"1\"")
-                        .append("/>\n");
-            }
-        }
-
-        sb.append("</svg>");
-        System.out.println(sb);
-
-        System.out.println(sb);
-
-        try {
-            FileWriter writeFile = new FileWriter(file);
-
-            writeFile.write(sb.toString());
-
-            writeFile.close();
-            System.out.println("Successfully wrote to file!");
-
-        } catch (IOException e) {
-                System.out.println("Error.");
-                e.printStackTrace();
-        }
+        SVG svg = new SVG();
+        svg.translateDrawingToSvgString(file, model.returnArray());
     }
 
 
